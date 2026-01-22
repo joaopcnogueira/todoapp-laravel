@@ -21,14 +21,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [TodoController::class, 'index'])->name('index');
         Route::get('/criar', [TodoController::class, 'create'])->name('create');
         Route::post('/', [TodoController::class, 'store'])->name('store');
+
+        // Static routes must come before dynamic {todo} routes
+        Route::get('/lixeira', [TodoController::class, 'trashed'])->name('trashed');
+        Route::patch('/lixeira/{id}/restaurar', [TodoController::class, 'restore'])->name('restore');
+        Route::delete('/lixeira/{id}', [TodoController::class, 'forceDelete'])->name('force-delete');
+
+        // Dynamic routes with {todo} parameter
         Route::get('/{todo}', [TodoController::class, 'show'])->name('show');
         Route::get('/{todo}/editar', [TodoController::class, 'edit'])->name('edit');
         Route::put('/{todo}', [TodoController::class, 'update'])->name('update');
         Route::patch('/{todo}/alternar', [TodoController::class, 'toggle'])->name('toggle');
         Route::delete('/{todo}', [TodoController::class, 'destroy'])->name('destroy');
-        Route::get('/lixeira', [TodoController::class, 'trashed'])->name('trashed');
-        Route::patch('/lixeira/{id}/restaurar', [TodoController::class, 'restore'])->name('restore');
-        Route::delete('/lixeira/{id}', [TodoController::class, 'forceDelete'])->name('force-delete');
 
         // Time tracking routes
         Route::post('/{todo}/time/start', [TimeEntryController::class, 'start'])->name('time.start');
