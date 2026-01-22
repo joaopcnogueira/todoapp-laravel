@@ -47,7 +47,7 @@ class Todo extends Model
     {
         return !$this->completed
             && $this->due_date
-            && $this->due_date->isPast();
+            && $this->due_date->lt(today());
     }
 
     public function scopePending($query)
