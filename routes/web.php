@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TimeEntryController;
 use App\Http\Controllers\TodoController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [TodoController::class, 'index'])->name('index');
         Route::get('/criar', [TodoController::class, 'create'])->name('create');
         Route::post('/', [TodoController::class, 'store'])->name('store');
+        Route::get('/{todo}', [TodoController::class, 'show'])->name('show');
         Route::get('/{todo}/editar', [TodoController::class, 'edit'])->name('edit');
         Route::put('/{todo}', [TodoController::class, 'update'])->name('update');
         Route::patch('/{todo}/alternar', [TodoController::class, 'toggle'])->name('toggle');
@@ -27,6 +29,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/lixeira', [TodoController::class, 'trashed'])->name('trashed');
         Route::patch('/lixeira/{id}/restaurar', [TodoController::class, 'restore'])->name('restore');
         Route::delete('/lixeira/{id}', [TodoController::class, 'forceDelete'])->name('force-delete');
+
+        // Time tracking routes
+        Route::post('/{todo}/time/start', [TimeEntryController::class, 'start'])->name('time.start');
+        Route::post('/{todo}/time/stop', [TimeEntryController::class, 'stop'])->name('time.stop');
+        Route::delete('/{todo}/time/{timeEntry}', [TimeEntryController::class, 'destroy'])->name('time.destroy');
     });
 
     // Category routes

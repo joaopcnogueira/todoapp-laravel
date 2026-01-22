@@ -132,7 +132,36 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-4">
+                            <!-- Timer -->
+                            @if(!$todo->completed)
+                                <div x-data="timer({{ Js::from([
+                                    'todoId' => $todo->id,
+                                    'isRunning' => $todo->is_timer_running,
+                                    'startedAt' => $todo->timer_started_at?->toIso8601String(),
+                                    'totalSeconds' => $todo->total_time_seconds ?? 0,
+                                ]) }})" class="flex items-center gap-2">
+                                    <span x-text="displayTime" class="font-mono text-sm" :class="isRunning ? 'text-green-600 font-semibold' : 'text-gray-500'"></span>
+                                    <button @click="toggleTimer()" :disabled="isLoading" class="w-8 h-8 rounded-full flex items-center justify-center transition-colors" :class="isRunning ? 'bg-orange-100 text-orange-600 hover:bg-orange-200' : 'bg-green-100 text-green-600 hover:bg-green-200'">
+                                        <template x-if="!isRunning">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z"/>
+                                            </svg>
+                                        </template>
+                                        <template x-if="isRunning">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                                            </svg>
+                                        </template>
+                                    </button>
+                                </div>
+                            @else
+                                @if($todo->total_time_seconds > 0)
+                                    <span class="font-mono text-sm text-gray-400">{{ $todo->formatted_total_time }}</span>
+                                @endif
+                            @endif
+
+                            <a href="{{ route('todos.show', $todo) }}" class="text-gray-600 hover:text-gray-900">Ver</a>
                             <a href="{{ route('todos.edit', $todo) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
                             <form action="{{ route('todos.destroy', $todo) }}" method="POST" onsubmit="return confirm('Mover tarefa para lixeira?')">
                                 @csrf
