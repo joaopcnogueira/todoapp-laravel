@@ -6,6 +6,7 @@ use App\Enums\Priority;
 use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
 use App\Models\Todo;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -77,10 +78,20 @@ class TodoController extends Controller
             ->with('success', 'Tarefa criada com sucesso!');
     }
 
+    public function show(Todo $todo)
+    {
+        $this->authorize('view', $todo);
+
+        $todo->load('timeEntries', 'category');
+
+        return view('todos.show', compact('todo'));
+    }
+
     public function edit(Todo $todo)
     {
         $this->authorize('update', $todo);
 
+        $todo->load('timeEntries');
         $categories = Auth::user()->categories()->orderBy('name')->get();
         $priorities = Priority::cases();
 
@@ -107,9 +118,35 @@ class TodoController extends Controller
     {
         $this->authorize('update', $todo);
 
+        $isCompleting = !$todo->completed;
+
+        // If completing and timer is running, stop it first
+        if ($isCompleting && $todo->timer_started_at) {
+            $activeEntry = $todo->activeTimeEntry;
+
+            if ($activeEntry) {
+                $now = Carbon::now();
+                $durationSeconds = (int) abs($now->diffInSeconds($activeEntry->started_at));
+
+                $activeEntry->update([
+                    'ended_at' => $now,
+                    'duration_seconds' => $durationSeconds,
+                ]);
+
+                $todo->update([
+                    'completed' => true,
+                    'completed_at' => $now,
+                    'timer_started_at' => null,
+                    'total_time_seconds' => ($todo->total_time_seconds ?? 0) + $durationSeconds,
+                ]);
+
+                return redirect()->back()->with('success', 'Tarefa concluída e timer parado!');
+            }
+        }
+
         $todo->update([
-            'completed' => !$todo->completed,
-            'completed_at' => !$todo->completed ? now() : null,
+            'completed' => $isCompleting,
+            'completed_at' => $isCompleting ? now() : null,
         ]);
 
         $message = $todo->completed

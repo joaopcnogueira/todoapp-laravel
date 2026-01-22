@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\TimeEntryController;
 use App\Http\Controllers\Api\TodoController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,4 +27,10 @@ Route::middleware('auth:sanctum')->group(function () {
         'update' => 'api.todos.update',
         'destroy' => 'api.todos.destroy',
     ]);
+
+    // Time tracking routes
+    Route::post('todos/{todo}/time/start', [TimeEntryController::class, 'start'])->name('api.todos.time.start');
+    Route::post('todos/{todo}/time/stop', [TimeEntryController::class, 'stop'])->name('api.todos.time.stop');
+    Route::get('todos/{todo}/time/status', [TimeEntryController::class, 'status'])->name('api.todos.time.status');
+    Route::delete('todos/{todo}/time/{timeEntry}', [TimeEntryController::class, 'destroy'])->name('api.todos.time.destroy');
 });

@@ -26,6 +26,11 @@ class TodoResource extends JsonResource
                     'color' => $this->category->color,
                 ];
             }),
+            'total_time_seconds' => $this->total_time_seconds ?? 0,
+            'formatted_total_time' => $this->formatted_total_time,
+            'timer_started_at' => $this->timer_started_at?->toIso8601String(),
+            'is_timer_running' => $this->is_timer_running,
+            'time_entries' => TimeEntryResource::collection($this->whenLoaded('timeEntries')),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];
